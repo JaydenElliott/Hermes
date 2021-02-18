@@ -15,9 +15,4 @@ mongoose.connect(
   }
 );
 
-let test = new MongoInterface();
 
-const channel1 = new Channel({ users: ["John"] });
-console.log("test");
-// test.addDocument(channel1);
-test.deleteDocument("deleteFirst", Channel, {name: "abc"}, true, true)
