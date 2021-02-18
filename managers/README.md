@@ -1,1 +1,1 @@
-# ArcStack Chat Server Managers Documentation
+# ArcStack Chat Server Managers
