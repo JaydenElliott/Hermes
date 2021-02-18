@@ -1,10 +1,10 @@
-const mongoose = require("mongoose");
+import * as mongoose from "mongoose";
 
 /**
  *  Mongo schema to define type: Room.
  *  A document (channel) ID is automatically generated
  */
-const ChannelSchema = mongoose.Schema({
+const ChannelSchema = new mongoose.Schema({
   name: {
     type: String,
     required: false,
@@ -22,4 +22,4 @@ const ChannelSchema = mongoose.Schema({
   },
 });
 
-module.exports = mongoose.model("Channel", ChannelSchema);
+export default mongoose.model("Channel", ChannelSchema);
