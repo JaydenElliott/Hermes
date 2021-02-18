@@ -12,7 +12,7 @@ func InitRouter() *gin.Engine {
 	r.Use(cors.Default())
 
 	// Initialise api router group
-	apiGroup := r.Group("/api")
+	// apiGroup := r.Group("/api")
 	//api.InitApiGroup(apiGroup) // this will be implemented later depending on plans
 
 	return r
