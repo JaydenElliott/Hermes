@@ -4,7 +4,7 @@ package models
 type Channel interface {
 	getID() string
 	getName() string
-	getUsers() string
+	getUsers() []string
 }
 
 // Interact with the channel class
