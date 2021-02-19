@@ -34,3 +34,20 @@ type Channel struct {
 	channelName *string
 	users       []*User
 }
+
+// Initialises managers and defines object design pattern`
+func InitialiseManager() *ChatServerManager {
+	controller := new(ChatServerManager)
+
+	// TODO: run config files here to ensure all databases and servers are running
+
+	// Initialise child structs
+	um := new(UserManager)
+	cm := new(ChannelManager)
+
+	controller.UserManager = um
+	controller.ChannelManager = cm
+
+	return controller
+
+}
