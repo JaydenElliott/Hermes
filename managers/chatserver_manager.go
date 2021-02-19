@@ -1,5 +1,9 @@
 package managers
 
+import (
+	"arcstack/arcstack-chat-server/managers/logic"
+)
+
 /*
 Define Fundamental Types
 */
@@ -13,26 +17,13 @@ type ChatServerManager struct {
 // Handles all business logic relating to a User
 type UserManager struct {
 	userManagerId *string
-	users         []*User
-}
-
-type User struct {
-	userId   *string
-	email    *string
-	username *string
-	channels []*Channel // chat channels this user is apart of  ** REVIEW (would a map be better)
+	users         []*logic.User
 }
 
 // Handles all business logic relating to a Channel
 type ChannelManager struct {
 	channelManagerID *string
-	channels         []*Channel
-}
-
-type Channel struct {
-	channelID   *string
-	channelName *string
-	users       []*User
+	channels         []*logic.Channel
 }
 
 // Initialises managers and defines object design pattern`
