@@ -1,7 +1,7 @@
 package app
 
 import (
-	"github.com/astaxie/beego/core/validation"
+	"github.com/astaxie/beego/validation"
 
 	"arcstack/arcstack-chat-server/pkg/logging"
 )
