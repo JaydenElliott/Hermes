@@ -1,6 +1,6 @@
 package logic
 
-// Parameters for getUsers function (see channel_logic.go & thread_logic.go)
+// Parameters for getUsers function (see channel_logic.go and thread_logic.go)
 type getUsersParams struct {
-	returnType string // [id, username]
+	returnType string // [userId, username]
 }
