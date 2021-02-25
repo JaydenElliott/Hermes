@@ -1,7 +1,7 @@
 package logging
 
 import (
-	"arcstack/console-playground-server/pkg/file"
+	"arcstack/arcstack-chat-server/pkg/util/files"
 	"fmt"
 	"log"
 	"os"
@@ -35,7 +35,7 @@ func Setup() {
 	var err error
 	filePath := getLogFilePath()
 	fileName := getLogFileName()
-	F, err = file.MustOpen(fileName, filePath)
+	F, err = files.MustOpen(fileName, filePath)
 	if err != nil {
 		log.Fatalf("logging.Setup err: %v", err)
 	}

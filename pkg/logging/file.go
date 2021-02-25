@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"arcstack/console-playground-server/pkg/setting"
+	"arcstack/arcstack-chat-server/pkg/setting"
 )
 
 // getLogFilePath get the log file save path
