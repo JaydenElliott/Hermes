@@ -1,7 +1,7 @@
 package logic
 
 type Thread struct {
-	threadID *string
+	threadID string
 	users    map[*User]bool
 	channel  *Channel
 }
