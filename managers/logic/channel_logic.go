@@ -14,7 +14,7 @@ type Channel struct {
 }
 
 // Create new Channel using CreateChanel_ parameters
-func (channel *Channel) CreateChannel(p CreateChannel_) *Channel {
+func CreateChannel(p CreateChannel_) *Channel {
 	channelID := uuid.New().String() // generate channel uuid
 	users := make(map[*User]bool)
 	threads := make(map[*Thread]bool)
