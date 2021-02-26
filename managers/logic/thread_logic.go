@@ -19,19 +19,19 @@ func (thread *Thread) CreateThread(p CreateThread_) *Thread {
 }
 
 // Get Thread ID
-func (thread *Thread) getID() *string {
+func (thread *Thread) GetID() *string {
 	return thread.threadID
 }
 
 // Get parent channel
-func (thread *Thread) getParentChannel() *Channel {
+func (thread *Thread) GetParentChannel() *Channel {
 	return thread.channel
 }
 
 // Description:    Gets all users in a specific Thread.
 // Input:          getUsersParams struct (logicParameters.go).
 // Returns:        List of pointers to user username or userID and error.
-func (thread *Thread) getThreadUsers(p GetUsersParams_) ([]*string, error) {
+func (thread *Thread) GetThreadUsers(p GetUsersParams_) ([]*string, error) {
 	var users []*string
 	var errorMsg error = nil
 

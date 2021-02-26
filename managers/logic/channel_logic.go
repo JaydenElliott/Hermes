@@ -22,19 +22,19 @@ func (channel *Channel) CreateChannel(p CreateChannel_) *Channel {
 }
 
 // Get Channel ID
-func (channel *Channel) getID() *string {
+func (channel *Channel) GetID() *string {
 	return channel.channelID
 }
 
 // Get Channel name
-func (channel *Channel) getName() *string {
+func (channel *Channel) GetName() *string {
 	return channel.channelName
 }
 
 // Description:    Gets all users in a specific Channel.
 // Input:          getUsersParams struct (logicParameters.go).
 // Returns:        List of pointers to user username or userID and error.
-func (channel *Channel) getChannelUsers(p GetUsersParams_) ([]*string, error) {
+func (channel *Channel) GetChannelUsers(p GetUsersParams_) ([]*string, error) {
 	var users []*string
 	var errorMsg error = nil
 
