@@ -13,8 +13,8 @@ type Channel struct {
 	threads     map[*Thread]bool
 }
 
-// Create Channel
-func (channel *Channel) createChannel(p CreateChannel_) *Channel {
+// Create new Channel using CreateChanel_ parameters
+func (channel *Channel) CreateChannel(p CreateChannel_) *Channel {
 	channelID := uuid.New().String() // generate channel uuid
 	users := make(map[*User]bool)
 	threads := make(map[*Thread]bool)
@@ -32,9 +32,9 @@ func (channel *Channel) getName() *string {
 }
 
 // Description:    Gets all users in a specific Channel.
-// Input:          getUsersParams struct (userParameters.go).
+// Input:          getUsersParams struct (logicParameters.go).
 // Returns:        List of pointers to user username or userID and error.
-func (channel *Channel) getChannelUsers(p GetUsersParams) ([]*string, error) {
+func (channel *Channel) getChannelUsers(p GetUsersParams_) ([]*string, error) {
 	var users []*string
 	var errorMsg error = nil
 
