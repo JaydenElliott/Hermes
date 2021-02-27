@@ -1,32 +1,32 @@
-package thread
+package logic
 
 import (
-	"arcstack/arcstack-chat-server/managers/logic/channel"
-	"arcstack/arcstack-chat-server/managers/logic/user"
 	"errors"
 	"fmt"
 )
 
 type Thread struct {
 	threadID *string
-	users    map[*user.User]bool
-	channel  *channel.Channel
+	users    map[*User]bool
+	channel  *Channel
 }
 
-// Get Thread ID
 func (thread *Thread) GetID() *string {
 	return thread.threadID
 }
 
-// Get parent channel
-func (thread *Thread) GetParentChannel() *channel.Channel {
+func (thread *Thread) GetParentChannel() *Channel {
 	return thread.channel
+}
+
+func (thread *Thread) GetUsers() map[*User]bool {
+	return thread.users
 }
 
 // Description:    Gets all users in a specific Thread.
 // Input:          getUsersParams struct (logicParameters.go).
 // Returns:        List of pointers to user username or userID and error.
-func (thread *Thread) GetThreadUsers(p GetUsersParams_) ([]*string, error) {
+func (thread *Thread) GetAllUsers(p GetUsersParams_) ([]*string, error) {
 	var users []*string
 	var errorMsg error = nil
 

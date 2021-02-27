@@ -1,11 +1,16 @@
-package channel
+package logic
 
+/*
+ Parameters for all functions relating to logic package
+*/
+
+// Update channel name
 type UpdateName_ struct {
 	UpdatedName string
 }
 
 // Parameters for CreateChannel function
-type Create_ struct {
+type CreateChannel_ struct {
 	ChannelName string
 }
 
