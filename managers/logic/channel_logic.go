@@ -54,3 +54,10 @@ func (channel *Channel) GetChannelUsers(p GetUsersParams_) ([]*string, error) {
 	}
 	return users, errorMsg
 }
+
+// Create a new thread within a channel. Function must be called from an instantiated channel.
+func (channel *Channel) CreateThread() *Thread {
+	threadID := uuid.New().String()
+	users := make(map[*User]bool)
+	return &Thread{&threadID, users, channel}
+}

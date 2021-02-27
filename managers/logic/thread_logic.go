@@ -3,19 +3,12 @@ package logic
 import (
 	"errors"
 	"fmt"
-	"github.com/google/uuid"
 )
 
 type Thread struct {
 	threadID *string
 	users    map[*User]bool
 	channel  *Channel
-}
-
-func (channel *Channel) CreateThread() *Thread {
-	threadID := uuid.New().String()
-	users := make(map[*User]bool)
-	return &Thread{&threadID, users, channel}
 }
 
 // Get Thread ID
