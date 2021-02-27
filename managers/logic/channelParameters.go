@@ -1,6 +1,5 @@
 package logic
 
-// Parameters for createChannel function
-type CreateChannel_ struct {
-	ChannelName string
+type UpdateName_ struct {
+	UpdatedName string
 }

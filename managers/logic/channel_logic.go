@@ -13,6 +13,10 @@ type Channel struct {
 	Threads     map[*Thread]bool
 }
 
+/*
+	Channel "GET" data methods.
+*/
+
 // Get Channel ID
 func (channel *Channel) GetID() *string {
 	return channel.ChannelID
@@ -46,6 +50,18 @@ func (channel *Channel) GetUsers(p GetUsersParams_) ([]*string, error) {
 	}
 	return users, errorMsg
 }
+
+/*
+	Channel modification methods
+*/
+
+func (channel *Channel) UpdateName(p UpdateName_) {
+	channel.ChannelName = &p.UpdatedName
+}
+
+/*
+	Channel Threads Methods
+*/
 
 // Create a new thread within a channel. Function must be called from an instantiated channel.
 func (channel *Channel) CreateThread() *Thread {

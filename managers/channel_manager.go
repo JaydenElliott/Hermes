@@ -6,7 +6,7 @@ import (
 )
 
 // Create new Channel using CreateChanel_ parameters
-func CreateChannel(p logic.CreateChannel_) *logic.Channel {
+func CreateChannel(p CreateChannel_) *logic.Channel {
 	channelID := uuid.New().String() // generate channel uuid
 	users := make(map[*logic.User]bool)
 	threads := make(map[*logic.Thread]bool)
