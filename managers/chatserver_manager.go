@@ -1,7 +1,8 @@
 package managers
 
 import (
-	"arcstack/arcstack-chat-server/managers/logic"
+	"arcstack/arcstack-chat-server/managers/logic/channel"
+	"arcstack/arcstack-chat-server/managers/logic/user"
 )
 
 /*
@@ -17,13 +18,13 @@ type ChatServerManager struct {
 // Handles all business logic relating to a User
 type UserManager struct {
 	userManagerId *string
-	users         []*logic.User
+	users         []*user.User
 }
 
 // Handles all business logic relating to a Channel
 type ChannelManager struct {
 	channelManagerID *string
-	channels         []*logic.Channel
+	channels         []*channel.Channel
 }
 
 // Initialises managers and defines object design pattern`

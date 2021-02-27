@@ -1,10 +1,10 @@
 package managers
 
 import (
-	"arcstack/arcstack-chat-server/managers/logic"
+	"arcstack/arcstack-chat-server/managers/logic/channel"
 )
 
 // Create new Channel using CreateChanel_ parameters
-func CreateChannel(p CreateChannel_) *logic.Channel {
-	return logic.CreateChannel(p.ChannelName)
+func CreateChannel(p CreateChannel_) *channel.Channel {
+	return channel.Create(p.ChannelName)
 }
