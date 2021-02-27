@@ -1,8 +1,6 @@
-package channel
+package logic
 
 import (
-	"arcstack/arcstack-chat-server/managers/logic/thread"
-	"arcstack/arcstack-chat-server/managers/logic/user"
 	"errors"
 	"fmt"
 	"github.com/google/uuid"
@@ -11,16 +9,16 @@ import (
 type Channel struct {
 	channelID   *string
 	channelName *string
-	users       map[*user.User]bool
-	threads     map[*thread.Thread]bool
+	users       map[*User]bool
+	threads     map[*Thread]bool
 }
 
 // Create channel method -> Used by channel_manager.go
 // Created here to allow Channel to be immutable
-func Create(channelName string) *Channel {
+func CreateChannel(channelName string) *Channel {
 	channelID := uuid.New().String() // generate channel uuid
-	users := make(map[*user.User]bool)
-	threads := make(map[*thread.Thread]bool)
+	users := make(map[*User]bool)
+	threads := make(map[*Thread]bool)
 	return &Channel{&channelID, &channelName, users, threads}
 }
 
@@ -36,12 +34,12 @@ func (channel *Channel) GetName() *string {
 	return channel.channelName
 }
 
-func (channel *Channel) GetAllUsers() map[*user.User]bool {
+func (channel *Channel) GetAllUsers() map[*User]bool {
 	return channel.users
 
 }
 
-func (channel *Channel) getThreads() map[*thread.Thread]bool {
+func (channel *Channel) getThreads() map[*Thread]bool {
 	return channel.threads
 }
 
@@ -82,8 +80,8 @@ func (channel *Channel) UpdateName(p UpdateName_) {
 */
 
 // Create a new thread within a channel. Function must be called from an instantiated channel.
-//func (channel *Channel) CreateThread() *thread.Thread {
-//	threadID := uuid.New().String()
-//	users := make(map[*user.User]bool)
-//	return &thread.Thread{&threadID, users, channel}
-//}
+func (channel *Channel) CreateThread() *Thread {
+	threadID := uuid.New().String()
+	users := make(map[*User]bool)
+	return &Thread{&threadID, users, channel}
+}
