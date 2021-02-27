@@ -34,7 +34,7 @@ func (channel *Channel) GetName() *string {
 // Description:    Gets all users in a specific Channel.
 // Input:          getUsersParams struct (logicParameters.go).
 // Returns:        List of pointers to user username or userID and error.
-func (channel *Channel) GetChannelUsers(p GetUsersParams_) ([]*string, error) {
+func (channel *Channel) GetUsers(p GetUsersParams_) ([]*string, error) {
 	var users []*string
 	var errorMsg error = nil
 
@@ -53,4 +53,11 @@ func (channel *Channel) GetChannelUsers(p GetUsersParams_) ([]*string, error) {
 		}
 	}
 	return users, errorMsg
+}
+
+// Create a new thread within a channel. Function must be called from an instantiated channel.
+func (channel *Channel) CreateThread() *Thread {
+	threadID := uuid.New().String()
+	users := make(map[*User]bool)
+	return &Thread{&threadID, users, channel}
 }
