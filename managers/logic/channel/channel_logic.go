@@ -1,6 +1,8 @@
-package logic
+package channel
 
 import (
+	"arcstack/arcstack-chat-server/managers/logic/thread"
+	"arcstack/arcstack-chat-server/managers/logic/user"
 	"errors"
 	"fmt"
 	"github.com/google/uuid"
@@ -9,31 +11,38 @@ import (
 type Channel struct {
 	channelID   *string
 	channelName *string
-	users       map[*User]bool
-	threads     map[*Thread]bool
+	users       map[*user.User]bool
+	threads     map[*thread.Thread]bool
 }
 
 // Create channel method -> Used by channel_manager.go
 // Created here to allow Channel to be immutable
-func CreateChannel(channelName string) *Channel {
+func Create(channelName string) *Channel {
 	channelID := uuid.New().String() // generate channel uuid
-	users := make(map[*User]bool)
-	threads := make(map[*Thread]bool)
+	users := make(map[*user.User]bool)
+	threads := make(map[*thread.Thread]bool)
 	return &Channel{&channelID, &channelName, users, threads}
 }
 
 /*
-	Channel "GET" data methods.
+	Methods to get channel fields
 */
 
-// Get Channel ID
 func (channel *Channel) GetID() *string {
 	return channel.channelID
 }
 
-// Get Channel name
 func (channel *Channel) GetName() *string {
 	return channel.channelName
+}
+
+func (channel *Channel) GetAllUsers() map[*user.User]bool {
+	return channel.users
+
+}
+
+func (channel *Channel) getThreads() map[*thread.Thread]bool {
+	return channel.threads
 }
 
 // Description:    Gets all users in a specific Channel.
@@ -44,12 +53,12 @@ func (channel *Channel) GetUsers(p GetUsersParams_) ([]*string, error) {
 	var errorMsg error = nil
 
 	// Loop through and append to return array all users satisfying users: True
-	for user, value := range channel.users {
+	for User, value := range channel.users {
 		if value {
 			if p.ReturnType == "username" {
-				users = append(users, user.username)
+				users = append(users, User.GetUsername())
 			} else if p.ReturnType == "userId" {
-				users = append(users, user.userId)
+				users = append(users, User.GetID())
 			} else {
 				errorMsg = errors.New(fmt.Sprintf("Invalid getChannelUsers() input parameter: %s", p.ReturnType))
 				users = nil
@@ -73,8 +82,8 @@ func (channel *Channel) UpdateName(p UpdateName_) {
 */
 
 // Create a new thread within a channel. Function must be called from an instantiated channel.
-func (channel *Channel) CreateThread() *Thread {
-	threadID := uuid.New().String()
-	users := make(map[*User]bool)
-	return &Thread{&threadID, users, channel}
-}
+//func (channel *Channel) CreateThread() *thread.Thread {
+//	threadID := uuid.New().String()
+//	users := make(map[*user.User]bool)
+//	return &thread.Thread{&threadID, users, channel}
+//}

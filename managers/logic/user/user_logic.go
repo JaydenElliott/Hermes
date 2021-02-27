@@ -12,18 +12,18 @@ type User struct {
 	threads  map[*thread.Thread]bool
 }
 
-func (user *User) getID() *string {
+func (user *User) GetID() *string {
 	return user.userId
 }
 
-func (user *User) getUsername() *string {
+func (user *User) GetUsername() *string {
 	return user.username
 }
 
-func (user *User) getChannels() map[*channel.Channel]bool {
+func (user *User) GetChannels() map[*channel.Channel]bool {
 	return user.channels
 }
 
-func (user *User) getThreads() map[*thread.Thread]bool {
+func (user *User) GetThreads() map[*thread.Thread]bool {
 	return user.threads
 }

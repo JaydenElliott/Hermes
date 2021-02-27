@@ -1,14 +1,16 @@
-package logic
+package thread
 
 import (
+	"arcstack/arcstack-chat-server/managers/logic/channel"
+	"arcstack/arcstack-chat-server/managers/logic/user"
 	"errors"
 	"fmt"
 )
 
 type Thread struct {
 	threadID *string
-	users    map[*User]bool
-	channel  *Channel
+	users    map[*user.User]bool
+	channel  *channel.Channel
 }
 
 // Get Thread ID
@@ -17,7 +19,7 @@ func (thread *Thread) GetID() *string {
 }
 
 // Get parent channel
-func (thread *Thread) GetParentChannel() *Channel {
+func (thread *Thread) GetParentChannel() *channel.Channel {
 	return thread.channel
 }
 
@@ -29,12 +31,12 @@ func (thread *Thread) GetThreadUsers(p GetUsersParams_) ([]*string, error) {
 	var errorMsg error = nil
 
 	// Loop through and append to return array all users satisfying users: True
-	for user, value := range thread.users {
+	for User, value := range thread.users {
 		if value {
 			if p.ReturnType == "username" {
-				users = append(users, user.username)
+				users = append(users, User.GetUsername())
 			} else if p.ReturnType == "userId" {
-				users = append(users, user.userId)
+				users = append(users, User.GetID())
 			} else {
 				errorMsg = errors.New(fmt.Sprintf("Invalid getThreadUsers() input parameter: %s", p.ReturnType))
 				users = nil
