@@ -7,28 +7,20 @@ import (
 )
 
 type Channel struct {
-	channelID   *string
-	channelName *string
-	users       map[*User]bool
-	threads     map[*Thread]bool
-}
-
-// Create new Channel using CreateChanel_ parameters
-func CreateChannel(p CreateChannel_) *Channel {
-	channelID := uuid.New().String() // generate channel uuid
-	users := make(map[*User]bool)
-	threads := make(map[*Thread]bool)
-	return &Channel{&channelID, &p.ChannelName, users, threads}
+	ChannelID   *string
+	ChannelName *string
+	Users       map[*User]bool
+	Threads     map[*Thread]bool
 }
 
 // Get Channel ID
 func (channel *Channel) GetID() *string {
-	return channel.channelID
+	return channel.ChannelID
 }
 
 // Get Channel name
 func (channel *Channel) GetName() *string {
-	return channel.channelName
+	return channel.ChannelName
 }
 
 // Description:    Gets all users in a specific Channel.
@@ -39,7 +31,7 @@ func (channel *Channel) GetUsers(p GetUsersParams_) ([]*string, error) {
 	var errorMsg error = nil
 
 	// Loop through and append to return array all users satisfying users: True
-	for user, value := range channel.users {
+	for user, value := range channel.Users {
 		if value {
 			if p.ReturnType == "username" {
 				users = append(users, user.username)
