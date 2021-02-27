@@ -34,7 +34,7 @@ func (channel *Channel) GetName() *string {
 // Description:    Gets all users in a specific Channel.
 // Input:          getUsersParams struct (logicParameters.go).
 // Returns:        List of pointers to user username or userID and error.
-func (channel *Channel) GetChannelUsers(p GetUsersParams_) ([]*string, error) {
+func (channel *Channel) GetUsers(p GetUsersParams_) ([]*string, error) {
 	var users []*string
 	var errorMsg error = nil
 
