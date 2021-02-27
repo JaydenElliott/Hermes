@@ -7,10 +7,19 @@ import (
 )
 
 type Channel struct {
-	ChannelID   *string
-	ChannelName *string
-	Users       map[*User]bool
-	Threads     map[*Thread]bool
+	channelID   *string
+	channelName *string
+	users       map[*User]bool
+	threads     map[*Thread]bool
+}
+
+// Create channel method -> Used by channel_manager.go
+// Created here to allow Channel to be immutable
+func CreateChannel(channelName string) *Channel {
+	channelID := uuid.New().String() // generate channel uuid
+	users := make(map[*User]bool)
+	threads := make(map[*Thread]bool)
+	return &Channel{&channelID, &channelName, users, threads}
 }
 
 /*
@@ -19,12 +28,12 @@ type Channel struct {
 
 // Get Channel ID
 func (channel *Channel) GetID() *string {
-	return channel.ChannelID
+	return channel.channelID
 }
 
 // Get Channel name
 func (channel *Channel) GetName() *string {
-	return channel.ChannelName
+	return channel.channelName
 }
 
 // Description:    Gets all users in a specific Channel.
@@ -35,7 +44,7 @@ func (channel *Channel) GetUsers(p GetUsersParams_) ([]*string, error) {
 	var errorMsg error = nil
 
 	// Loop through and append to return array all users satisfying users: True
-	for user, value := range channel.Users {
+	for user, value := range channel.users {
 		if value {
 			if p.ReturnType == "username" {
 				users = append(users, user.username)
@@ -56,7 +65,7 @@ func (channel *Channel) GetUsers(p GetUsersParams_) ([]*string, error) {
 */
 
 func (channel *Channel) UpdateName(p UpdateName_) {
-	channel.ChannelName = &p.UpdatedName
+	channel.channelName = &p.UpdatedName
 }
 
 /*
