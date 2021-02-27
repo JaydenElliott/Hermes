@@ -12,10 +12,10 @@ type Thread struct {
 	channel  *Channel
 }
 
-func CreateThread(p CreateThread_) *Thread {
+func (channel *Channel) CreateThread() *Thread {
 	threadID := uuid.New().String()
 	users := make(map[*User]bool)
-	return &Thread{&threadID, users, p.Channel}
+	return &Thread{&threadID, users, channel}
 }
 
 // Get Thread ID
