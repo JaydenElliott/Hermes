@@ -1,8 +1,4 @@
-package logic
-
-type UpdateName_ struct {
-	UpdatedName string
-}
+package managers
 
 // Parameters for CreateChannel function
 type CreateChannel_ struct {

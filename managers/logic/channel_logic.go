@@ -13,13 +13,18 @@ type Channel struct {
 	threads     map[*Thread]bool
 }
 
-// Create new Channel using CreateChanel_ parameters
-func CreateChannel(p CreateChannel_) *Channel {
+// Create channel method -> Used by channel_manager.go
+// Created here to allow Channel to be immutable
+func CreateChannel(channelName string) *Channel {
 	channelID := uuid.New().String() // generate channel uuid
 	users := make(map[*User]bool)
 	threads := make(map[*Thread]bool)
-	return &Channel{&channelID, &p.ChannelName, users, threads}
+	return &Channel{&channelID, &channelName, users, threads}
 }
+
+/*
+	Channel "GET" data methods.
+*/
 
 // Get Channel ID
 func (channel *Channel) GetID() *string {
@@ -54,6 +59,18 @@ func (channel *Channel) GetUsers(p GetUsersParams_) ([]*string, error) {
 	}
 	return users, errorMsg
 }
+
+/*
+	Channel modification methods
+*/
+
+func (channel *Channel) UpdateName(p UpdateName_) {
+	channel.channelName = &p.UpdatedName
+}
+
+/*
+	Channel Threads Methods
+*/
 
 // Create a new thread within a channel. Function must be called from an instantiated channel.
 func (channel *Channel) CreateThread() *Thread {
