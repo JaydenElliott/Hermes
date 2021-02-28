@@ -24,3 +24,9 @@
 
 # patches
 /patches/
+
+# node stuff
+/node_modules/
+/mongo/models/node_modules/
+/package-lock.json
+/mongo/models/package-lock.json
