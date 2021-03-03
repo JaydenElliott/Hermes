@@ -2,6 +2,7 @@ package managers
 
 import (
 	"arcstack/arcstack-chat-server/managers/logic"
+	"sync"
 )
 
 /*
@@ -12,6 +13,7 @@ Define Fundamental Types
 type ChatServerManager struct {
 	UserManager    *UserManager
 	ChannelManager *ChannelManager
+	wsServer       *logic.WsServer
 }
 
 // Handles all business logic relating to a User
@@ -28,9 +30,12 @@ type ChannelManager struct {
 
 // Initialises managers and defines object design pattern`
 func InitialiseManager() *ChatServerManager {
+
 	controller := new(ChatServerManager)
 
-	// TODO: run config files here to ensure all databases and servers are running
+	// Initialise the websocketServer
+	server := logic.NewWsServer()
+	controller.wsServer = server
 
 	// Initialise child structs
 	um := new(UserManager)
@@ -40,5 +45,11 @@ func InitialiseManager() *ChatServerManager {
 	controller.ChannelManager = cm
 
 	return controller
+
+}
+
+func (chatManager *ChatServerManager) RunWsServer(waitgroup *sync.WaitGroup) {
+	go chatManager.wsServer.Run()
+	//waitgroup.Done() // uncomment to allow async
 
 }
