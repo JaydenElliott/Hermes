@@ -30,7 +30,9 @@ type ChannelManager struct {
 func InitialiseManager() *ChatServerManager {
 	controller := new(ChatServerManager)
 
-	// TODO: run config files here to ensure all databases and servers are running
+	// Initialise and run the websocketServer
+	wsServer := logic.NewWsServer()
+	go wsServer.Run()
 
 	// Initialise child structs
 	um := new(UserManager)

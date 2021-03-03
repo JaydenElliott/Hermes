@@ -1,7 +1,6 @@
 package logic
 
 import (
-	"errors"
 	"fmt"
 )
 
@@ -20,7 +19,8 @@ type WsServer struct {
 	unregister chan *User
 }
 
-func newWsServer() *WsServer {
+// Create a new websocket server
+func NewWsServer() *WsServer {
 	return &WsServer{
 		broadcast:  make(chan []byte),
 		register:   make(chan *User),
@@ -29,6 +29,19 @@ func newWsServer() *WsServer {
 	}
 }
 
+// Run the websocket server and listen for register/unregister requests
 func (server *WsServer) Run() {
-
+	for {
+		select {
+		case user := <-server.register:
+			server.users[user] = true
+		case user := <-server.unregister:
+			// if user exists
+			if _, ok := server.users[user]; ok {
+				delete(server.users, user)
+			} else {
+				fmt.Println("Unable to unregister user ... user not found")
+			}
+		}
+	}
 }
