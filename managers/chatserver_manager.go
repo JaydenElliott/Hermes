@@ -2,7 +2,6 @@ package managers
 
 import (
 	"arcstack/arcstack-chat-server/managers/logic"
-	"sync"
 )
 
 /*
@@ -48,8 +47,6 @@ func InitialiseManager() *ChatServerManager {
 
 }
 
-func (chatManager *ChatServerManager) RunWsServer(waitgroup *sync.WaitGroup) {
+func (chatManager *ChatServerManager) RunWsServer() {
 	go chatManager.wsServer.Run()
-	//waitgroup.Done() // uncomment to allow async
-
 }
