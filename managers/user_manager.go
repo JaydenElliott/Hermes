@@ -1,1 +1,10 @@
 package managers
+
+import (
+	"arcstack/arcstack-chat-server/managers/logic"
+)
+
+// Create new User using CreateUser_ parameters
+func CreateUser(p CreateUser_) *logic.User {
+	return logic.CreateUser(p.UserName)
+}
