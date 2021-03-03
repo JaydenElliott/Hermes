@@ -31,6 +31,7 @@ func NewWsServer() *WsServer {
 
 // Run the websocket server and listen for register/unregister requests
 func (server *WsServer) Run() {
+	fmt.Println("WebSocket Server Initialised and Running")
 	for {
 		select {
 		case user := <-server.register:
