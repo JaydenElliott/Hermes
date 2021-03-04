@@ -1,6 +1,7 @@
 package logic
 
 import (
+	"arcstack/arcstack-chat-server/pkg/util/connection"
 	"fmt"
 	"net/http"
 )
@@ -57,5 +58,15 @@ func (server *WsServer) ServeHome(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET" {
 		http.Error(w, "Request not supported on endpoint `/` -> Only GET request allowed", http.StatusMethodNotAllowed)
 	}
-	http.ServeFile(w, r, "home.html") // change this to our html endpoint
+	http.ServeFile(w, r, "home.html") // change this to the users html endpoint // TODO
+}
+
+func (server *WsServer) ServeWs(w http.ResponseWriter, r *http.Request) {
+	wsConnection, err := connection.UpgradeHTTPToWS(w, r)
+	if err != nil {
+		fmt.Println("Error in establishing websocket connection: ", err)
+	}
+
+	// TODO setup user (client) side connection with read/write pump
+
 }

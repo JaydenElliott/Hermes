@@ -15,17 +15,17 @@ type BufferSizes struct {
 }
 
 // Creates buffers with default (4096/4096) read write sizes
-func CreateDefaultBuffer() *BufferSizes {
+func createDefaultBuffer() *BufferSizes {
 	return &BufferSizes{4096, 4096}
 }
 
 // Creates buffers with custom read/write sizes
-func CreateCustomBuffer(readSize int, writeSize int) *BufferSizes {
+func createCustomBuffer(readSize int, writeSize int) *BufferSizes {
 	return &BufferSizes{readSize, writeSize}
 }
 
 //MakeUpgrader: make a websocket upgrader based on specified buffersizes.
-func MakeUpgrader(bufferSizes *BufferSizes) websocket.Upgrader {
+func makeUpgrader(bufferSizes *BufferSizes) websocket.Upgrader {
 
 	if bufferSizes.readBufferSize == 0 {
 		bufferSizes.readBufferSize = 4096
@@ -42,7 +42,8 @@ func MakeUpgrader(bufferSizes *BufferSizes) websocket.Upgrader {
 }
 
 // upgradeHTTPToWS upgrades the HTTP server connection to the WebSocket protocol.
-func UpgradeHTTPToWS(upgrader websocket.Upgrader, w http.ResponseWriter, r *http.Request) (*websocket.Conn, error) {
+func UpgradeHTTPToWS(w http.ResponseWriter, r *http.Request) (*websocket.Conn, error) {
+	upgrader := makeUpgrader(createDefaultBuffer())
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		return nil, err
