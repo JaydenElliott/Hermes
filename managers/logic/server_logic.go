@@ -2,6 +2,7 @@ package logic
 
 import (
 	"fmt"
+	"net/http"
 )
 
 type WsServer struct {
@@ -45,4 +46,16 @@ func (server *WsServer) Run() {
 			}
 		}
 	}
+}
+
+func (server *WsServer) ServeHome(w http.ResponseWriter, r *http.Request) {
+	// Check for the correct endpoint location.
+	if r.URL.Path != "/" {
+		http.Error(w, "Endpoint not found", http.StatusNotFound)
+		return
+	}
+	if r.Method != "GET" {
+		http.Error(w, "Request not supported on endpoint `/` -> Only GET request allowed", http.StatusMethodNotAllowed)
+	}
+	http.ServeFile(w, r, "home.html") // change this to our html endpoint
 }
