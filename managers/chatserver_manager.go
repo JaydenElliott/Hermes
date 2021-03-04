@@ -2,6 +2,9 @@ package managers
 
 import (
 	"arcstack/arcstack-chat-server/managers/logic"
+	"flag"
+	"fmt"
+	"net/http"
 )
 
 /*
@@ -48,5 +51,19 @@ func InitialiseManager() *ChatServerManager {
 }
 
 func (chatManager *ChatServerManager) RunWsServer() {
+	// TODO: move this to config
+	var addr = flag.String("addr", ":8080", "http service address")
+	// Start websocket register listener
 	go chatManager.wsServer.Run()
+	// Start homepage endpoint listener: this is where our users will plugging in their homepage
+	http.HandleFunc("/", chatManager.wsServer.ServeHome)
+	// Start websocket read/write pump listening
+	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
+		chatManager.wsServer.ServeWs(w, r)
+	})
+	// Port listening
+	err := http.ListenAndServe(*addr, nil)
+	if err != nil {
+		fmt.Println("ListenAndServe Error: ", err)
+	}
 }
