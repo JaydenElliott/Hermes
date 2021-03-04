@@ -69,4 +69,5 @@ func (server *WsServer) ServeWs(w http.ResponseWriter, r *http.Request) {
 
 	// TODO setup user (client) side connection with read/write pump
 
+	fmt.Println(wsConnection)
 }
