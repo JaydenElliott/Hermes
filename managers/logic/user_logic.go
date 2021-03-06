@@ -18,16 +18,6 @@ type User struct {
 	dataBuffer chan []byte
 }
 
-// Conn default:
-// maxMessageSize: 1000
-// duration: 60 * time.Second
-type Conn struct {
-	// Maximum message size allowed from peer.
-	maxMessageSize int64
-	// Max time till next pong from peer
-	duration time.Duration
-}
-
 // Create user method -> Used by user_manager.go
 func CreateUser(userName string, conn *websocket.Conn, wsServer *WsServer) *User {
 	userID := uuid.New().String()
@@ -60,27 +50,18 @@ func (user *User) GetWsSever() *WsServer {
 	return user.wsServer
 }
 
-func (user *User) configureConn(maxMessageSize int64, duration time.Duration) {
-
-	if maxMessageSize == 0 {
-		maxMessageSize = 10000
-	}
-
-	if duration == 0 {
-		duration = 60 * time.Second
-	}
-
+func (user *User) configureConn(maxMessageSize int64, pong time.Duration) {
 	user.conn.SetReadLimit(maxMessageSize)
-	_ = user.conn.SetReadDeadline(time.Now().Add(duration))
-	user.conn.SetPongHandler(func(string) error { _ = user.conn.SetReadDeadline(time.Now().Add(duration)); return nil })
+	_ = user.conn.SetReadDeadline(time.Now().Add(pong))
+	user.conn.SetPongHandler(func(string) error { _ = user.conn.SetReadDeadline(time.Now().Add(pong)); return nil })
 }
 
-func (user *User) CircularRead(maxMessageSize int64, duration time.Duration) {
+func (user *User) CircularRead(maxMessageSize int64, pong time.Duration) {
 	defer func() {
 		_ = user.DisconnectWithWsServer()
 	}()
 
-	user.configureConn(maxMessageSize, duration)
+	user.configureConn(maxMessageSize, pong)
 
 	// Start endless read loop, waiting for messages from client
 	for {
@@ -92,6 +73,55 @@ func (user *User) CircularRead(maxMessageSize int64, duration time.Duration) {
 			break
 		}
 		user.wsServer.broadcast <- jsonMessage
+	}
+}
+
+func (user *User) CircularWrite(period time.Duration, maxWriteWaitTime time.Duration) {
+	ticker := time.NewTicker(period)
+	defer func() {
+		ticker.Stop()
+		_ = user.conn.Close()
+	}()
+
+	for {
+		select {
+		case message, ok := <-user.dataBuffer:
+			// SetWriteDeadline sets the maxWriteWaitTime as a deadline on the underlying network connection.
+			// If maxWriteWaitTime has timed out, the websocket state is corrupt and
+			// all future writes will return an error :(
+			//A zero value for t means writes will not time out.
+			_ = user.conn.SetWriteDeadline(time.Now().Add(maxWriteWaitTime))
+			if !ok {
+				// The WsServer closed the channel.
+				_ = user.conn.WriteMessage(websocket.CloseMessage, []byte{})
+				return
+			}
+
+			w, err := user.conn.NextWriter(websocket.TextMessage)
+			if err != nil {
+				return
+			}
+			_, err = w.Write(message)
+			if err != nil {
+				return
+			}
+
+			// Attach queued chat messages to the current websocket message.
+			n := len(user.dataBuffer)
+			for i := 0; i < n; i++ {
+				_, _ = w.Write(newline)
+				_, _ = w.Write(<-user.dataBuffer)
+			}
+
+			if err := w.Close(); err != nil {
+				return
+			}
+		case <-ticker.C:
+			_ = user.conn.SetWriteDeadline(time.Now().Add(maxWriteWaitTime))
+			if err := user.conn.WriteMessage(websocket.PingMessage, nil); err != nil {
+				return
+			}
+		}
 	}
 }
 
