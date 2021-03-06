@@ -4,6 +4,7 @@ import (
 	"arcstack/arcstack-chat-server/pkg/util/connection"
 	"fmt"
 	"net/http"
+	"time"
 )
 
 type WsServer struct {
@@ -67,7 +68,12 @@ func (server *WsServer) ServeWs(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Error in establishing websocket connection: ", err)
 	}
 
-	// TODO setup user (client) side connection with read/write pump
+	user := CreateUser("testUser", wsConnection, server)
+
+	go user.CircularRead(1000, 60*time.Second)
+	go user.CircularWrite((60*time.Second*9)/10, 10*time.Second)
+
+	server.register <- user
 
 	fmt.Println(wsConnection)
 }

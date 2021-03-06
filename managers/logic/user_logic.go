@@ -76,8 +76,8 @@ func (user *User) CircularRead(maxMessageSize int64, pong time.Duration) {
 	}
 }
 
-func (user *User) CircularWrite(period time.Duration, maxWriteWaitTime time.Duration) {
-	ticker := time.NewTicker(period)
+func (user *User) CircularWrite(ping time.Duration, maxWriteWaitTime time.Duration) {
+	ticker := time.NewTicker(ping)
 	defer func() {
 		ticker.Stop()
 		_ = user.conn.Close()
