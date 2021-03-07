@@ -60,6 +60,16 @@ type Redis struct {
 
 var RedisSetting = &Redis{}
 
+type WsServer struct {
+	Port             string
+	Ping             time.Duration
+	Pong             time.Duration
+	MaxWriteWaitTime time.Duration
+	MaxMessageSize   int64
+}
+
+var WsServerSetting = &WsServer{}
+
 var cfg *ini.File
 
 // Setup initialize the configuration instance
@@ -75,10 +85,15 @@ func Setup() {
 	mapTo("mysql", MySQLDatabaseSetting)
 	mapTo("mongodb", MongoDBDatabaseSetting)
 	mapTo("redis", RedisSetting)
+	mapTo("wsServer", WsServerSetting)
 
 	ServerSetting.ReadTimeout = ServerSetting.ReadTimeout * time.Second
 	ServerSetting.WriteTimeout = ServerSetting.WriteTimeout * time.Second
 	RedisSetting.IdleTimeout = RedisSetting.IdleTimeout * time.Second
+
+	WsServerSetting.Ping = (WsServerSetting.Ping * time.Second * 9) / 10
+	WsServerSetting.Pong = WsServerSetting.Pong * time.Second
+	WsServerSetting.MaxWriteWaitTime = WsServerSetting.MaxWriteWaitTime * time.Second
 }
 
 // mapTo map section
