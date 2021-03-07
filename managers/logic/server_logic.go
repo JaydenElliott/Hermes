@@ -46,20 +46,16 @@ func (server *WsServer) Run() {
 			} else {
 				fmt.Println("Unable to unregister user ... user not found")
 			}
+		case message := <-server.broadcast:
+			server.broadcastToUsers(message)
 		}
 	}
 }
 
-func (server *WsServer) ServeHome(w http.ResponseWriter, r *http.Request) {
-	// Check for the correct endpoint location.
-	if r.URL.Path != "/" {
-		http.Error(w, "Endpoint not found", http.StatusNotFound)
-		return
+func (server *WsServer) broadcastToUsers(message []byte) {
+	for user := range server.users {
+		user.dataBuffer <- message
 	}
-	if r.Method != "GET" {
-		http.Error(w, "Request not supported on endpoint `/` -> Only GET request allowed", http.StatusMethodNotAllowed)
-	}
-	http.ServeFile(w, r, "home.html") // change this to the users html endpoint // TODO
 }
 
 func (server *WsServer) ServeWs(w http.ResponseWriter, r *http.Request) {
@@ -74,6 +70,4 @@ func (server *WsServer) ServeWs(w http.ResponseWriter, r *http.Request) {
 	go user.CircularWrite((60*time.Second*9)/10, 10*time.Second)
 
 	server.register <- user
-
-	fmt.Println(wsConnection)
 }
