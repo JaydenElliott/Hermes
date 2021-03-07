@@ -37,6 +37,7 @@ func makeUpgrader(bufferSizes *BufferSizes) websocket.Upgrader {
 	var upgrader = websocket.Upgrader{
 		ReadBufferSize:  bufferSizes.readBufferSize,
 		WriteBufferSize: bufferSizes.writeBufferSize,
+		CheckOrigin:     func(*http.Request) bool { return true },
 	}
 	return upgrader
 }
