@@ -1,7 +1,6 @@
 package logic
 
 import (
-	"fmt"
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 	"log"
@@ -58,7 +57,10 @@ func (user *User) configureConn(maxMessageSize int64, pong time.Duration) {
 
 func (user *User) CircularRead(maxMessageSize int64, pong time.Duration) {
 	defer func() {
-		_ = user.DisconnectWithWsServer()
+		err := user.DisconnectWithWsServer()
+		if err != nil {
+			log.Printf("[ERROR] unexpected error when user trying to disconnect with the WebSocket error: %v", err)
+		}
 	}()
 
 	user.configureConn(maxMessageSize, pong)
@@ -80,7 +82,10 @@ func (user *User) CircularWrite(ping time.Duration, maxWriteWaitTime time.Durati
 	ticker := time.NewTicker(ping)
 	defer func() {
 		ticker.Stop()
-		_ = user.conn.Close()
+		err := user.conn.Close()
+		if err != nil {
+			log.Printf("[ERROR] unexpected user connection close error: %v", err)
+		}
 	}()
 
 	for {
@@ -90,10 +95,16 @@ func (user *User) CircularWrite(ping time.Duration, maxWriteWaitTime time.Durati
 			// If maxWriteWaitTime has timed out, the websocket state is corrupt and
 			// all future writes will return an error :(
 			//A zero value for t means writes will not time out.
-			_ = user.conn.SetWriteDeadline(time.Now().Add(maxWriteWaitTime))
+			err := user.conn.SetWriteDeadline(time.Now().Add(maxWriteWaitTime))
+			if err != nil {
+				log.Printf("[ERROR] unexpected error for setting : %v", err)
+			}
 			if !ok {
 				// The WsServer closed the channel.
-				_ = user.conn.WriteMessage(websocket.CloseMessage, []byte{})
+				err := user.conn.WriteMessage(websocket.CloseMessage, []byte{})
+				if err != nil {
+					log.Printf("[ERROR] unexpected error when user connection writing messages: %v", err)
+				}
 				return
 			}
 
@@ -110,15 +121,22 @@ func (user *User) CircularWrite(ping time.Duration, maxWriteWaitTime time.Durati
 			n := len(user.dataBuffer)
 			for i := 0; i < n; i++ {
 				_, _ = w.Write(newline)
-				_, _ = w.Write(<-user.dataBuffer)
+				_, err := w.Write(<-user.dataBuffer)
+				if err != nil {
+					log.Printf("[ERROR] unexpected error when writer writing data buffer: %v", err)
+				}
 			}
 
 			if err := w.Close(); err != nil {
 				return
 			}
 		case <-ticker.C:
-			_ = user.conn.SetWriteDeadline(time.Now().Add(maxWriteWaitTime))
+			err := user.conn.SetWriteDeadline(time.Now().Add(maxWriteWaitTime))
+			if err != nil {
+				log.Printf("[ERROR] unexpected error when user conection setting write deadline: %v", err)
+			}
 			if err := user.conn.WriteMessage(websocket.PingMessage, nil); err != nil {
+				log.Printf("[ERROR] unexpected error when user conection writing messages: %v", err)
 				return
 			}
 		}
@@ -130,7 +148,7 @@ func (user *User) DisconnectWithWsServer() error {
 	close(user.dataBuffer)
 	err := user.conn.Close()
 	if err != nil {
-		return fmt.Errorf("[ERROR] unable to disconnect user %s with the ws server", *user.GetUsername())
+		return err
 	}
 	return nil
 }
