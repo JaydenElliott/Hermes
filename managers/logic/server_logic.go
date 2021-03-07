@@ -1,10 +1,10 @@
 package logic
 
 import (
+	"arcstack/arcstack-chat-server/pkg/setting"
 	"arcstack/arcstack-chat-server/pkg/util/connection"
 	"fmt"
 	"net/http"
-	"time"
 )
 
 type WsServer struct {
@@ -66,8 +66,8 @@ func (server *WsServer) ServeWs(w http.ResponseWriter, r *http.Request) {
 
 	user := CreateUser("testUser", wsConnection, server)
 
-	go user.CircularWrite((60*time.Second*9)/10, 10*time.Second)
-	go user.CircularRead(1000, 60*time.Second)
+	go user.CircularWrite(setting.WsServerSetting.Ping, setting.WsServerSetting.MaxWriteWaitTime)
+	go user.CircularRead(setting.WsServerSetting.MaxMessageSize, setting.WsServerSetting.Pong)
 
 	server.register <- user
 }
