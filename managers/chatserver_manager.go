@@ -55,8 +55,6 @@ func (chatManager *ChatServerManager) RunWsServer() {
 	var addr = flag.String("addr", ":8080", "http service address")
 	// Start websocket register listener
 	go chatManager.wsServer.Run()
-	// Start homepage endpoint listener: this is where our users will plugging in their homepage
-	http.HandleFunc("/", chatManager.wsServer.ServeHome)
 	// Start websocket read/write pump listening
 	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		chatManager.wsServer.ServeWs(w, r)
