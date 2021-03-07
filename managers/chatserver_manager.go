@@ -2,6 +2,7 @@ package managers
 
 import (
 	"arcstack/arcstack-chat-server/managers/logic"
+	"arcstack/arcstack-chat-server/pkg/setting"
 	"flag"
 	"fmt"
 	"net/http"
@@ -51,8 +52,7 @@ func InitialiseManager() *ChatServerManager {
 }
 
 func (chatManager *ChatServerManager) RunWsServer() {
-	// TODO: move this to config
-	var addr = flag.String("addr", ":8080", "http service address")
+	var addr = flag.String("addr", setting.WsServerSetting.Port, "http service address")
 	// Start websocket register listener
 	go chatManager.wsServer.Run()
 	// Start websocket read/write pump listening
