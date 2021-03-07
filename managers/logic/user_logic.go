@@ -49,13 +49,21 @@ func (user *User) GetWsSever() *WsServer {
 	return user.wsServer
 }
 
+// Configure read size limits / time out duration / pong handling
 func (user *User) configureConn(maxMessageSize int64, pong time.Duration) {
 	user.conn.SetReadLimit(maxMessageSize)
 	_ = user.conn.SetReadDeadline(time.Now().Add(pong))
 	user.conn.SetPongHandler(func(string) error { _ = user.conn.SetReadDeadline(time.Now().Add(pong)); return nil })
 }
 
+// CircularRead will continuously read incoming messages to the websocket.
+//
+// Parameters:
+// 		maxMessageSize (int64) size limit of the message in bytes
+// 		pong (time.Duration) set pong max response time to detect dead client
 func (user *User) CircularRead(maxMessageSize int64, pong time.Duration) {
+
+	// Disconnect websocket server
 	defer func() {
 		err := user.DisconnectWithWsServer()
 		if err != nil {
@@ -63,6 +71,7 @@ func (user *User) CircularRead(maxMessageSize int64, pong time.Duration) {
 		}
 	}()
 
+	// Set Read Timeout / Size Limits / Pong Handling
 	user.configureConn(maxMessageSize, pong)
 
 	// Start endless read loop, waiting for messages from client
@@ -94,7 +103,7 @@ func (user *User) CircularWrite(ping time.Duration, maxWriteWaitTime time.Durati
 			// SetWriteDeadline sets the maxWriteWaitTime as a deadline on the underlying network connection.
 			// If maxWriteWaitTime has timed out, the websocket state is corrupt and
 			// all future writes will return an error :(
-			//A zero value for t means writes will not time out.
+			// A zero value for t means writes will not time out.
 			err := user.conn.SetWriteDeadline(time.Now().Add(maxWriteWaitTime))
 			if err != nil {
 				log.Printf("[ERROR] unexpected error for setting : %v", err)
@@ -108,6 +117,7 @@ func (user *User) CircularWrite(ping time.Duration, maxWriteWaitTime time.Durati
 				return
 			}
 
+			// Generate a writer for the next message to utilise
 			w, err := user.conn.NextWriter(websocket.TextMessage)
 			if err != nil {
 				return
@@ -144,8 +154,13 @@ func (user *User) CircularWrite(ping time.Duration, maxWriteWaitTime time.Durati
 }
 
 func (user *User) DisconnectWithWsServer() error {
+	// Unregister user from websocket
 	user.wsServer.unregister <- user
+
+	// Close msg buffer channel
 	close(user.dataBuffer)
+
+	// Close websocket connection
 	err := user.conn.Close()
 	if err != nil {
 		return err
