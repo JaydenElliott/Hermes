@@ -66,8 +66,8 @@ func (server *WsServer) ServeWs(w http.ResponseWriter, r *http.Request) {
 
 	user := CreateUser("testUser", wsConnection, server)
 
-	go user.CircularRead(1000, 60*time.Second)
 	go user.CircularWrite((60*time.Second*9)/10, 10*time.Second)
+	go user.CircularRead(1000, 60*time.Second)
 
 	server.register <- user
 }
