@@ -89,6 +89,9 @@ func (user *User) CircularRead(maxMessageSize int64, pong time.Duration) {
 
 func (user *User) CircularWrite(ping time.Duration, maxWriteWaitTime time.Duration) {
 	ticker := time.NewTicker(ping)
+
+	// When the client side user connection is broken,
+	// close the ws connection from the server side and log the error.
 	defer func() {
 		ticker.Stop()
 		err := user.conn.Close()
@@ -97,6 +100,7 @@ func (user *User) CircularWrite(ping time.Duration, maxWriteWaitTime time.Durati
 		}
 	}()
 
+	// Circular Write
 	for {
 		select {
 		case message, ok := <-user.dataBuffer:
@@ -136,10 +140,10 @@ func (user *User) CircularWrite(ping time.Duration, maxWriteWaitTime time.Durati
 					log.Printf("[ERROR] unexpected error when writer writing data buffer: %v", err)
 				}
 			}
-
 			if err := w.Close(); err != nil {
 				return
 			}
+
 		case <-ticker.C:
 			err := user.conn.SetWriteDeadline(time.Now().Add(maxWriteWaitTime))
 			if err != nil {
@@ -153,6 +157,8 @@ func (user *User) CircularWrite(ping time.Duration, maxWriteWaitTime time.Durati
 	}
 }
 
+// DisconnectWithWsServer unregisters user from server
+// closes the buffer channel and closes the websocket connection.
 func (user *User) DisconnectWithWsServer() error {
 	// Unregister user from websocket
 	user.wsServer.unregister <- user

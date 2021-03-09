@@ -24,7 +24,8 @@ func createCustomBuffer(readSize int, writeSize int) *BufferSizes {
 	return &BufferSizes{readSize, writeSize}
 }
 
-//MakeUpgrader: make a websocket upgrader based on specified buffersizes.
+//makeUpgrader: make a websocket upgrader based on specified buffersizes.
+// Utility function for UpgradeHTTPToWS function.
 func makeUpgrader(bufferSizes *BufferSizes) websocket.Upgrader {
 
 	if bufferSizes.readBufferSize == 0 {
@@ -42,7 +43,7 @@ func makeUpgrader(bufferSizes *BufferSizes) websocket.Upgrader {
 	return upgrader
 }
 
-// upgradeHTTPToWS upgrades the HTTP server connection to the WebSocket protocol.
+// UpgradeHTTPToWS upgrades the HTTP server connection to the WebSocket protocol.
 func UpgradeHTTPToWS(w http.ResponseWriter, r *http.Request) (*websocket.Conn, error) {
 	upgrader := makeUpgrader(createDefaultBuffer())
 	conn, err := upgrader.Upgrade(w, r, nil)
