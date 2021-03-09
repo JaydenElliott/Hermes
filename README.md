@@ -1,4 +1,4 @@
-# ArcStack Websocket Service
+# ArcStack WebSocket Service
 
 ## Code logic
 
