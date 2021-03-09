@@ -4,6 +4,7 @@ import (
 	"arcstack/arcstack-chat-server/pkg/setting"
 	"arcstack/arcstack-chat-server/pkg/util/connection"
 	"fmt"
+	"log"
 	"net/http"
 )
 
@@ -65,6 +66,7 @@ func (server *WsServer) ServeWs(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user := CreateUser("testUser", wsConnection, server)
+	log.Printf("[INFO] new client connected")
 
 	go user.CircularWrite(setting.WsServerSetting.Ping, setting.WsServerSetting.MaxWriteWaitTime)
 	go user.CircularRead(setting.WsServerSetting.MaxMessageSize, setting.WsServerSetting.Pong)
