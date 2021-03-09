@@ -51,14 +51,20 @@ func InitialiseManager() *ChatServerManager {
 
 }
 
+// RunWsServer starts the websocket server, and beings listening on the port
+// specified in config. On client connection/upgrade request, it will attempt
+// to establish a websocket handshake.
 func (chatManager *ChatServerManager) RunWsServer() {
 	var addr = flag.String("addr", setting.WsServerSetting.Port, "http service address")
+
 	// Start websocket register listener
 	go chatManager.wsServer.Run()
+
 	// Start websocket read/write pump listening
 	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		chatManager.wsServer.ServeWs(w, r)
 	})
+
 	// Port listening
 	err := http.ListenAndServe(*addr, nil)
 	if err != nil {
