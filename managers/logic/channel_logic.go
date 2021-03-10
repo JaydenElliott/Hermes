@@ -11,15 +11,30 @@ type Channel struct {
 	channelName *string
 	users       map[*User]bool
 	threads     map[*Thread]bool
+	register    chan *User
+	unregister  chan *User
+	broadcast   chan *Message
 }
 
 // Create channel method -> Used by channel_manager.go
 // Created here to allow Channel to be immutable
 func CreateChannel(channelName string) *Channel {
-	channelID := uuid.New().String() // generate channel uuid
+
+	// Initialise fields
+	channelID := uuid.New().String()
 	users := make(map[*User]bool)
 	threads := make(map[*Thread]bool)
-	return &Channel{&channelID, &channelName, users, threads}
+	register := make(chan *User)
+	unregister := make(chan *User)
+	broadcast := make(chan *Message)
+
+	return &Channel{&channelID,
+		&channelName,
+		users,
+		threads,
+		register,
+		unregister,
+		broadcast}
 }
 
 /*
