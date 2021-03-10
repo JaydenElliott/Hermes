@@ -37,10 +37,29 @@ func CreateChannel(channelName string) *Channel {
 		broadcast}
 }
 
+func (channel *Channel) Run() {
+	fmt.Println("Channel %s Running", channel.channelName)
+	for {
+		select {
+
+		case user := <-channel.register:
+			channel.registerUser(user)
+
+		case user := <-channel.unregister:
+			channel.unregisterUser(user)
+
+		case message := <-channel.broadcast:
+			channel.broadcastToUsers(message.marshal())
+		}
+	}
+}
+
 // Adds a user to a room
 func (channel *Channel) registerUser(user *User) {
-
 	// Send join message to room
+	message := &Message{Action: "User Registered",
+		Message: fmt.Sprintf("Welcome %s to the %s!", *user.username, *channel.channelName)}
+	channel.broadcastToUsers(message.marshal())
 
 	// Register user
 	channel.users[user] = true
@@ -49,6 +68,9 @@ func (channel *Channel) registerUser(user *User) {
 // Removes user from a room
 func (channel *Channel) unregisterUser(user *User) {
 	// Send leave message to room
+	message := &Message{Action: "User Left",
+		Message: fmt.Sprintf("%s left the channel", *user.username)}
+	channel.broadcastToUsers(message.marshal())
 
 	// Remove from room
 	if _, ok := channel.users[user]; ok {
@@ -57,7 +79,10 @@ func (channel *Channel) unregisterUser(user *User) {
 
 }
 
-func (channel *Channel) broadcastToUsers() {
+func (channel *Channel) broadcastToUsers(message []byte) {
+	for client := range channel.users {
+		client.dataBuffer <- message
+	}
 }
 
 /*
