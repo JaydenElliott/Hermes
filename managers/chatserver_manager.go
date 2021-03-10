@@ -22,13 +22,13 @@ type ChatServerManager struct {
 // Handles all business logic relating to a User
 type UserManager struct {
 	userManagerId *string
-	users         []*logic.User
+	users         map[*logic.User]bool
 }
 
 // Handles all business logic relating to a Channel
 type ChannelManager struct {
 	channelManagerID *string
-	channels         []*logic.Channel
+	channels         map[*logic.Channel]bool
 }
 
 // Initialises managers and defines object design pattern`
