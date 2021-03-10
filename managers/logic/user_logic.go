@@ -87,7 +87,9 @@ func (user *User) CircularRead(maxMessageSize int64, pong time.Duration) {
 	}
 }
 
+// CircularWrite handles sending messages to the connected user.
 func (user *User) CircularWrite(ping time.Duration, maxWriteWaitTime time.Duration) {
+	//  Define ticker to send client pings every "ping" duration.
 	ticker := time.NewTicker(ping)
 
 	// When the client side user connection is broken,
@@ -100,7 +102,7 @@ func (user *User) CircularWrite(ping time.Duration, maxWriteWaitTime time.Durati
 		}
 	}()
 
-	// Circular Write
+	// Begin circular Write
 	for {
 		select {
 		case message, ok := <-user.dataBuffer:
@@ -144,11 +146,15 @@ func (user *User) CircularWrite(ping time.Duration, maxWriteWaitTime time.Durati
 				return
 			}
 
+		// Every "ping" amount of time, ping client and wait for response.
+		// No response => error.
 		case <-ticker.C:
+			// Set new write deadline
 			err := user.conn.SetWriteDeadline(time.Now().Add(maxWriteWaitTime))
 			if err != nil {
 				log.Printf("[ERROR] unexpected error when user conection setting write deadline: %v", err)
 			}
+			// Send Ping
 			if err := user.conn.WriteMessage(websocket.PingMessage, nil); err != nil {
 				log.Printf("[ERROR] unexpected error when user conection writing messages: %v", err)
 				return

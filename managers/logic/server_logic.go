@@ -4,6 +4,7 @@ import (
 	"arcstack/arcstack-chat-server/pkg/setting"
 	"arcstack/arcstack-chat-server/pkg/util/connection"
 	"fmt"
+	"github.com/google/uuid"
 	"log"
 	"net/http"
 )
@@ -76,9 +77,7 @@ func (server *WsServer) ServeWs(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Println("Error in establishing websocket connection: ", err)
 	}
-
-	// Create user -- TODO: change from testUser to something else
-	user := CreateUser("testUser", wsConnection, server)
+	user := CreateUser(uuid.NewString(), wsConnection, server)
 	log.Printf("[INFO] new client connected")
 
 	go user.CircularWrite(setting.WsServerSetting.Ping, setting.WsServerSetting.MaxWriteWaitTime)
