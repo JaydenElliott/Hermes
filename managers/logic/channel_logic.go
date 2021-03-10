@@ -37,6 +37,29 @@ func CreateChannel(channelName string) *Channel {
 		broadcast}
 }
 
+// Adds a user to a room
+func (channel *Channel) registerUser(user *User) {
+
+	// Send join message to room
+
+	// Register user
+	channel.users[user] = true
+}
+
+// Removes user from a room
+func (channel *Channel) unregisterUser(user *User) {
+	// Send leave message to room
+
+	// Remove from room
+	if _, ok := channel.users[user]; ok {
+		delete(channel.users, user)
+	}
+
+}
+
+func (channel *Channel) broadcastToUsers() {
+}
+
 /*
 	Methods to get channel fields
 */
