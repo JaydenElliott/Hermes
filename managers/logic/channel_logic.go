@@ -49,7 +49,7 @@ func (channel *Channel) Run() {
 			channel.unregisterUser(user)
 
 		case message := <-channel.broadcast:
-			channel.broadcastToUsers(message.marshal())
+			channel.broadcastToUsers(MessageMarshal(*message))
 		}
 	}
 }
@@ -57,9 +57,9 @@ func (channel *Channel) Run() {
 // Adds a user to a room
 func (channel *Channel) registerUser(user *User) {
 	// Send join message to room
-	message := &Message{Action: "User Registered",
+	message := &Message{Action: JoinChannelAction,
 		Message: fmt.Sprintf("Welcome %s to the %s!", *user.username, *channel.channelName)}
-	channel.broadcastToUsers(message.marshal())
+	channel.broadcastToUsers(MessageMarshal(*message))
 
 	// Register user
 	channel.users[user] = true
@@ -70,7 +70,7 @@ func (channel *Channel) unregisterUser(user *User) {
 	// Send leave message to room
 	message := &Message{Action: "User Left",
 		Message: fmt.Sprintf("%s left the channel", *user.username)}
-	channel.broadcastToUsers(message.marshal())
+	channel.broadcastToUsers(MessageMarshal(*message))
 
 	// Remove from room
 	if _, ok := channel.users[user]; ok {

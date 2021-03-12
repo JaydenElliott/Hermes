@@ -3,6 +3,7 @@ package logic
 import (
 	"arcstack/arcstack-chat-server/pkg/setting"
 	"arcstack/arcstack-chat-server/pkg/util/connection"
+	"errors"
 	"fmt"
 	"github.com/google/uuid"
 	"log"
@@ -14,6 +15,9 @@ type WsServer struct {
 
 	// Registered users (clients)
 	users map[*User]bool
+
+	// Channels associated with server
+	channels map[*Channel]bool
 
 	// Incoming user messages
 	broadcast chan []byte
@@ -33,6 +37,7 @@ func NewWsServer() *WsServer {
 		register:   make(chan *User),
 		unregister: make(chan *User),
 		users:      make(map[*User]bool),
+		channels:   make(map[*Channel]bool),
 	}
 }
 
@@ -84,4 +89,26 @@ func (server *WsServer) ServeWs(w http.ResponseWriter, r *http.Request) {
 	go user.CircularRead(setting.WsServerSetting.MaxMessageSize, setting.WsServerSetting.Pong)
 
 	server.register <- user
+}
+
+// FindChannel searches through the servers channel array
+// and returns
+func (server *WsServer) FindChannel(p FindChannelParams) (*Channel, error) {
+	var res *Channel
+	for channel := range server.channels {
+		if p.name != nil {
+			if channel.GetName() == p.name {
+				res = channel
+			}
+		} else if p.id != nil {
+			if channel.GetID() == p.name {
+				res = channel
+			}
+		}
+	}
+	if res != nil {
+		return res, nil
+	} else {
+		return nil, errors.New("Unable to find channel")
+	}
 }

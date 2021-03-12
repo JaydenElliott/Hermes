@@ -40,3 +40,11 @@ type Conn struct {
 	// Maximum waiting time when writing to peers.
 	maxWriteWaitTime time.Duration
 }
+
+/*
+	server_logic
+*/
+type FindChannelParams struct {
+	name *string
+	id   *string
+}

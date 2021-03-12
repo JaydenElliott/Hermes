@@ -5,6 +5,11 @@ import (
 	"log"
 )
 
+// Message actions
+const SendMessageAction = "send-message"
+const JoinChannelAction = "join-room"
+const LeaveChannelAction = "leave-room"
+
 type Message struct {
 	// Message request type
 	Action string `json:"action"`
@@ -19,20 +24,19 @@ type Message struct {
 	Sender *User `json:"sender"`
 }
 
-func (message *Message) marshal() []byte {
-	_json, err := json.Marshal(message)
+func MessageMarshal(msg Message) []byte {
+	_json, err := json.Marshal(msg)
 	if err != nil {
 		log.Println(err)
 	}
-
 	return _json
 }
 
-func (message *Message) Unmarshal(msg []byte) *Message {
+func MessageUnmarshal(msg []byte) *Message {
 	var unmarshalledMessage Message
 	err := json.Unmarshal(msg, &unmarshalledMessage)
 	if err != nil {
-		log.Println("Error with unmarhsal", err)
+		log.Println("Error with unmarshal", err)
 		return nil
 	} else {
 		return &unmarshalledMessage

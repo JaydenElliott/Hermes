@@ -1,6 +1,7 @@
 package logic
 
 import (
+	"errors"
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 	"log"
@@ -177,5 +178,36 @@ func (user *User) DisconnectWithWsServer() error {
 	if err != nil {
 		return err
 	}
+	return nil
+}
+
+func (user *User) newMessage(jsonMsg []byte) error {
+
+	// Convert msg to the correct format
+	msg := MessageUnmarshal(jsonMsg)
+	if msg == nil {
+		return errors.New("Unable to handle new message")
+	}
+
+	// User is the sender of the message
+	msg.Sender = user
+
+	switch msg.Action {
+	case SendMessageAction:
+		// Room to send message to
+		channelName := msg.Target.GetName()
+
+		// If channel exists, send the message to the channel's broadcast method
+		if channel, _ := user.wsServer.FindChannel(FindChannelParams{channelName, nil}); channel != nil {
+			channel.broadcast <- msg
+		}
+
+	case JoinChannelAction:
+		//user.handleJoinChannelMessage(msg)
+
+	case LeaveChannelAction:
+		//user.handleLeaveChannelMessage(msg)
+	}
+
 	return nil
 }
