@@ -212,16 +212,16 @@ func (user *User) newMessage(jsonMsg []byte) error {
 	return nil
 }
 
-// HandleJoinChannelMessage
-func (user *User) HandleJoinChannelMessage(message Message) {
-	// Channel name is stored in the message
-	channelName := message.Message
-
+// HandleJoinChannel will add a user to a room or create a new
+// room if no room with the associated name exists.
+//
+// Params message Message: the channel the user wants to join/create
+func (user *User) HandleJoinChannel(message Message) {
 	// Find the channel the user wants to join.
 	// If channel doesn't exist, make one with associated ChannelName
-	channel, _ := user.wsServer.FindChannel(FindChannelParams{&channelName, nil})
+	channel, _ := user.wsServer.FindChannel(FindChannelParams{&message.Message, nil})
 	if channel == nil {
-		channel = user.wsServer.NewWsChannel(channelName)
+		channel = user.wsServer.NewWsChannel(message.Message)
 	}
 
 	// Append channel to users channel map
@@ -229,4 +229,23 @@ func (user *User) HandleJoinChannelMessage(message Message) {
 
 	// Add user to channel in the channel method
 	channel.register <- user
+}
+
+// HandleLeaveChannel searches for the channel the user wants to leave
+// and attempts to delete the user from the channel
+func (user *User) HandleLeaveChannel(message Message) {
+
+	// Find channel user requests to leave.
+	channel, _ := user.wsServer.FindChannel(FindChannelParams{&message.Message, nil})
+
+	// Attempt to delete channel from user map.
+	ok := user.channels[channel]
+	if ok {
+		delete(user.channels, channel)
+	} else {
+		log.Println("Unable to remove user from channel as channel not found in user map.")
+	}
+
+	// Remove user from channel's users
+	channel.unregister <- user
 }
