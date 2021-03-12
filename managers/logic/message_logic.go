@@ -27,3 +27,14 @@ func (message *Message) marshal() []byte {
 
 	return _json
 }
+
+func (message *Message) Unmarshal(msg []byte) *Message {
+	var unmarshalledMessage Message
+	err := json.Unmarshal(msg, &unmarshalledMessage)
+	if err != nil {
+		log.Println("Error with unmarhsal", err)
+		return nil
+	} else {
+		return &unmarshalledMessage
+	}
+}
