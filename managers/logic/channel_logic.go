@@ -42,6 +42,7 @@ func (channel *Channel) Run() {
 	for {
 		select {
 
+		// If content exists in channel.register chan, pull it out
 		case user := <-channel.register:
 			channel.registerUser(user)
 

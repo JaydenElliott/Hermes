@@ -211,3 +211,22 @@ func (user *User) newMessage(jsonMsg []byte) error {
 
 	return nil
 }
+
+// HandleJoinChannelMessage
+func (user *User) HandleJoinChannelMessage(message Message) {
+	// Channel name is stored in the message
+	channelName := message.Message
+
+	// Find the channel the user wants to join.
+	// If channel doesn't exist, make one with associated ChannelName
+	channel, _ := user.wsServer.FindChannel(FindChannelParams{&channelName, nil})
+	if channel == nil {
+		channel = user.wsServer.NewWsChannel(channelName)
+	}
+
+	// Append channel to users channel map
+	user.channels[channel] = true
+
+	// Add user to channel in the channel method
+	channel.register <- user
+}

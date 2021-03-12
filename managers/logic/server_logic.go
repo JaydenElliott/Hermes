@@ -112,3 +112,11 @@ func (server *WsServer) FindChannel(p FindChannelParams) (*Channel, error) {
 		return nil, errors.New("Unable to find channel")
 	}
 }
+
+// Creates a new channel and appends it to the map of
+// channels stored in the websocket server.
+func (server *WsServer) NewWsChannel(channelName string) *Channel {
+	channel := CreateChannel(channelName)
+	server.channels[channel] = true
+	return channel
+}
