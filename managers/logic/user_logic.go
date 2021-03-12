@@ -9,8 +9,8 @@ import (
 )
 
 type User struct {
-	userId     *string
-	username   *string
+	UserId     string  `json:"UserId"` // encoded to be parsed with messages
+	username   *string // name to be displayed around the server
 	channels   map[*Channel]bool
 	threads    map[*Thread]bool
 	conn       *websocket.Conn
@@ -23,11 +23,11 @@ func CreateUser(userName string, conn *websocket.Conn, wsServer *WsServer) *User
 	userID := uuid.New().String()
 	channels := make(map[*Channel]bool)
 	threads := make(map[*Thread]bool)
-	return &User{&userID, &userName, channels, threads, conn, wsServer, make(chan []byte, 256)}
+	return &User{userID, &userName, channels, threads, conn, wsServer, make(chan []byte, 256)}
 }
 
-func (user *User) GetID() *string {
-	return user.userId
+func (user *User) GetID() string {
+	return user.UserId
 }
 
 func (user *User) GetUsername() *string {

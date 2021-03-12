@@ -64,6 +64,9 @@ func (channel *Channel) registerUser(user *User) {
 
 	// Register user
 	channel.users[user] = true
+
+	// Notify channel members that someone joined
+	channel.notifyClientJoined(user)
 }
 
 // Removes user from a room
@@ -81,9 +84,22 @@ func (channel *Channel) unregisterUser(user *User) {
 }
 
 func (channel *Channel) broadcastToUsers(message []byte) {
-	for client := range channel.users {
-		client.dataBuffer <- message
+	for user := range channel.users {
+		user.dataBuffer <- message
 	}
+}
+
+// Notifies the room that the user with username x joined.
+func (channel *Channel) notifyClientJoined(user *User) {
+	const welcomeMessage = "%s joined the room"
+	message := &Message{
+		Action:  SendMessageAction,
+		Target:  channel,
+		Message: fmt.Sprintf(welcomeMessage, user.GetUsername()),
+	}
+
+	// Send to all the users of the channel.
+	channel.broadcastToUsers(MessageMarshal(*message))
 }
 
 /*
@@ -120,7 +136,8 @@ func (channel *Channel) GetUsers(p GetUsersParams_) ([]*string, error) {
 			if p.ReturnType == "username" {
 				users = append(users, User.GetUsername())
 			} else if p.ReturnType == "userId" {
-				users = append(users, User.GetID())
+				id := User.GetID()
+				users = append(users, &id)
 			} else {
 				errorMsg = errors.New(fmt.Sprintf("Invalid getChannelUsers() input parameter: %s", p.ReturnType))
 				users = nil
