@@ -36,7 +36,8 @@ func (thread *Thread) GetAllUsers(p GetUsersParams_) ([]*string, error) {
 			if p.ReturnType == "username" {
 				users = append(users, User.GetUsername())
 			} else if p.ReturnType == "userId" {
-				users = append(users, User.GetID())
+				id := User.GetID()
+				users = append(users, &id)
 			} else {
 				errorMsg = errors.New(fmt.Sprintf("Invalid getThreadUsers() input parameter: %s", p.ReturnType))
 				users = nil
