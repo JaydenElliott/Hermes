@@ -71,10 +71,46 @@ func (server *WsServer) FindChannel(p FindChannelParams) (*Channel, error) {
 	}
 }
 
+func (server *WsServer) findChannelByName(channelName string) *Channel {
+	var res *Channel
+	for channel := range server.channels {
+		if *channel.GetName() == channelName {
+			res = channel
+			break
+		}
+	}
+
+	return res
+}
+
+func (server *WsServer) findChannelByID(ID string) *Channel {
+	var res *Channel
+	for channel := range server.channels {
+		if *channel.GetID() == ID {
+			res = channel
+			break
+		}
+	}
+
+	return res
+}
+
+func (server *WsServer) findUserByID(ID string) *User {
+	var res *User
+	for user := range server.users {
+		if user.UserId == ID {
+			res = user
+			break
+		}
+	}
+
+	return res
+}
+
 // Creates a new channel and appends it to the map of
 // channels stored in the websocket server.
-func (server *WsServer) NewWsChannel(channelName string) *Channel {
-	channel := CreateChannel(channelName)
+func (server *WsServer) NewWsChannel(channelName string, private bool) *Channel {
+	channel := CreateChannel(channelName, private)
 	go channel.Run()
 	server.channels[channel] = true
 	return channel

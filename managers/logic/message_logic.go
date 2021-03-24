@@ -11,6 +11,8 @@ const JoinChannelAction = "join-channel"
 const LeaveChannelAction = "leave-channel"
 const UserJoinAction = "user-join"
 const UserLeftAction = "user-left"
+const JoinPrivateChannelAction = "join-private-channel"
+const ChannelJoinedAction = "channel-joined"
 
 type Message struct {
 	// Message request type

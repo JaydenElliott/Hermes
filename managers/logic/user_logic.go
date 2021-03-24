@@ -208,49 +208,125 @@ func (user *User) HandleNewMessage(jsonMsg []byte) error {
 		}
 
 	case JoinChannelAction:
-		//user.handleJoinChannelMessage(msg)
+		user.HandleJoinChannelMessage(msg)
 
 	case LeaveChannelAction:
-		//user.handleLeaveChannelMessage(msg)
+		user.handleLeaveChannelMessage(msg)
+
+	case JoinPrivateChannelAction:
+		user.handleJoinChannelPrivateMessage(msg)
 	}
 
 	return nil
 }
 
-// HandleJoinChannel will add a user to a room or create a new
-// room if no room with the associated name exists.
-//
-// Params message Message: the channel the user wants to join/create
-func (user *User) HandleJoinChannel(message Message) {
-	// Find the channel the user wants to join.
-	// If channel doesn't exist, make one with associated ChannelName
-	channel, _ := user.wsServer.FindChannel(FindChannelParams{&message.Message, nil})
-	if channel == nil {
-		channel = user.wsServer.NewWsChannel(message.Message)
-	}
-
-	// Append channel to users channel map
-	user.channels[channel] = true
-
-	// Add user to channel in the channel method
-	channel.register <- user
+func (user *User) HandleJoinChannelMessage(message *Message) {
+	channelName := message.Message
+	user.joinChannel(channelName, nil)
 }
 
-// HandleLeaveChannel searches for the channel the user wants to leave
-// and attempts to delete the user from the channel
-func (user *User) HandleLeaveChannel(message Message) {
-
-	// Find channel user requests to leave.
-	channel, _ := user.wsServer.FindChannel(FindChannelParams{&message.Message, nil})
-
-	// Attempt to delete channel from user map.
-	ok := user.channels[channel]
-	if ok {
-		delete(user.channels, channel)
-	} else {
-		log.Println("Unable to remove user from channel as channel not found in user map.")
+func (user *User) handleLeaveChannelMessage(message *Message) {
+	channel := user.wsServer.findChannelByID(message.Message)
+	if channel == nil {
+		return
 	}
 
-	// Remove user from channel's users
+	if _, ok := user.channels[channel]; ok {
+		delete(user.channels, channel)
+	}
+
 	channel.unregister <- user
 }
+
+func (user *User) handleJoinChannelPrivateMessage(message *Message) {
+
+	target := user.wsServer.findUserByID(message.Message)
+
+	if target == nil {
+		return
+	}
+
+	// create unique room name combined to the two IDs
+	channelName := message.Message + user.UserId
+
+	user.joinChannel(channelName, target)
+	target.joinChannel(channelName, user)
+
+}
+
+func (user *User) joinChannel(channelName string, sender *User) {
+
+	channel := user.wsServer.findChannelByName(channelName)
+	if channel == nil {
+		channel = user.wsServer.NewWsChannel(channelName, sender != nil)
+	}
+
+	if sender == nil && channel.Private {
+		return
+	}
+
+	if !user.isInChannel(channel) {
+
+		user.channels[channel] = true
+		channel.register <- user
+
+		user.notifyChannelJoined(channel, sender)
+	}
+
+}
+
+func (user *User) isInChannel(channel *Channel) bool {
+	if _, ok := user.channels[channel]; ok {
+		return true
+	}
+
+	return false
+}
+
+func (user *User) notifyChannelJoined(channel *Channel, sender *User) {
+	message := Message{
+		Action: ChannelJoinedAction,
+		Target: channel,
+		Sender: sender,
+	}
+
+	user.dataBuffer <- MessageMarshal(message)
+}
+
+//// HandleJoinChannel will add a user to a room or create a new
+//// room if no room with the associated name exists.
+////
+//// Params message Message: the channel the user wants to join/create
+//func (user *User) HandleJoinChannel(message *Message) {
+//	// Find the channel the user wants to join.
+//	// If channel doesn't exist, make one with associated ChannelName
+//	channel, _ := user.wsServer.FindChannel(FindChannelParams{&message.Message, nil})
+//	if channel == nil {
+//		channel = user.wsServer.NewWsChannel(message.Message)
+//	}
+//
+//	// Append channel to users channel map
+//	user.channels[channel] = true
+//
+//	// Add user to channel in the channel method
+//	channel.register <- user
+//}
+//
+//// HandleLeaveChannel searches for the channel the user wants to leave
+//// and attempts to delete the user from the channel
+//func (user *User) HandleLeaveChannel(message *Message) {
+//
+//	// Find channel user requests to leave.
+//	channel, _ := user.wsServer.FindChannel(FindChannelParams{&message.Message, nil})
+//
+//	// Attempt to delete channel from user map.
+//	ok := user.channels[channel]
+//	if ok {
+//		delete(user.channels, channel)
+//	} else {
+//		log.Println("Unable to remove user from channel as channel not found in user map.")
+//	}
+//
+//	// Remove user from channel's users
+//	channel.unregister <- user
+//}

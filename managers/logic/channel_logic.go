@@ -14,11 +14,12 @@ type Channel struct {
 	register    chan *User
 	unregister  chan *User
 	broadcast   chan *Message
+	Private     bool `json:"private"`
 }
 
 // Create channel method -> Used by channel_manager.go
 // Created here to allow Channel to be immutable
-func CreateChannel(channelName string) *Channel {
+func CreateChannel(channelName string, private bool) *Channel {
 
 	// Initialise fields
 	channelID := uuid.New().String()
@@ -34,7 +35,8 @@ func CreateChannel(channelName string) *Channel {
 		threads,
 		register,
 		unregister,
-		broadcast}
+		broadcast,
+		private}
 }
 
 func (channel *Channel) Run() {
