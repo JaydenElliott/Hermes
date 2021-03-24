@@ -7,8 +7,10 @@ import (
 
 // Message actions
 const SendMessageAction = "send-message"
-const JoinChannelAction = "join-room"
-const LeaveChannelAction = "leave-room"
+const JoinChannelAction = "join-channel"
+const LeaveChannelAction = "leave-channel"
+const UserJoinAction = "user-join"
+const UserLeftAction = "user-left"
 
 type Message struct {
 	// Message request type

@@ -84,7 +84,7 @@ func (user *User) CircularRead(maxMessageSize int64, pong time.Duration) {
 			}
 			break
 		}
-		user.wsServer.broadcast <- jsonMessage
+		user.HandleNewMessage(jsonMessage)
 	}
 }
 
@@ -170,6 +170,11 @@ func (user *User) DisconnectWithWsServer() error {
 	// Unregister user from websocket
 	user.wsServer.unregister <- user
 
+	// Unregister the user from the channels
+	for channel := range user.channels {
+		channel.unregister <- user
+	}
+
 	// Close msg buffer channel
 	close(user.dataBuffer)
 
@@ -181,7 +186,7 @@ func (user *User) DisconnectWithWsServer() error {
 	return nil
 }
 
-func (user *User) newMessage(jsonMsg []byte) error {
+func (user *User) HandleNewMessage(jsonMsg []byte) error {
 
 	// Convert msg to the correct format
 	msg := MessageUnmarshal(jsonMsg)
