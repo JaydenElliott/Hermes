@@ -65,9 +65,6 @@ func (chatManager *ChatServerManager) RunWsServer() {
 		chatManager.wsServer.ServeWs(w, r)
 	})
 
-	fs := http.FileServer(http.Dir("../public"))
-	http.Handle("/", fs)
-
 	// Port listening
 	err := http.ListenAndServe(*addr, nil)
 	if err != nil {
