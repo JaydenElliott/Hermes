@@ -5,6 +5,9 @@ import (
 )
 
 // Create new Channel using CreateChanel_ parameters
-func CreateChannel(p CreateChannel_) *logic.Channel {
-	return logic.CreateChannel(p.ChannelName)
+func (cm *ChannelManager) CreateChannel(p CreateChannel_, private bool) *logic.Channel {
+	channel := logic.CreateChannel(p.ChannelName, private)
+	go channel.Run()
+	cm.channels[channel] = true
+	return channel
 }

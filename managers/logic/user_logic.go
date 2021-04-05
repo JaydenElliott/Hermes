@@ -1,6 +1,7 @@
 package logic
 
 import (
+	"errors"
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 	"log"
@@ -8,8 +9,8 @@ import (
 )
 
 type User struct {
-	userId     *string
-	username   *string
+	UserId     string  `json:"UserId"` // encoded to be parsed with messages
+	username   *string // name to be displayed around the server
 	channels   map[*Channel]bool
 	threads    map[*Thread]bool
 	conn       *websocket.Conn
@@ -22,11 +23,11 @@ func CreateUser(userName string, conn *websocket.Conn, wsServer *WsServer) *User
 	userID := uuid.New().String()
 	channels := make(map[*Channel]bool)
 	threads := make(map[*Thread]bool)
-	return &User{&userID, &userName, channels, threads, conn, wsServer, make(chan []byte, 256)}
+	return &User{userID, &userName, channels, threads, conn, wsServer, make(chan []byte, 256)}
 }
 
-func (user *User) GetID() *string {
-	return user.userId
+func (user *User) GetID() string {
+	return user.UserId
 }
 
 func (user *User) GetUsername() *string {
@@ -83,11 +84,13 @@ func (user *User) CircularRead(maxMessageSize int64, pong time.Duration) {
 			}
 			break
 		}
-		user.wsServer.broadcast <- jsonMessage
+		user.HandleNewMessage(jsonMessage)
 	}
 }
 
+// CircularWrite handles sending messages to the connected user.
 func (user *User) CircularWrite(ping time.Duration, maxWriteWaitTime time.Duration) {
+	//  Define ticker to send client pings every "ping" duration.
 	ticker := time.NewTicker(ping)
 
 	// When the client side user connection is broken,
@@ -100,7 +103,7 @@ func (user *User) CircularWrite(ping time.Duration, maxWriteWaitTime time.Durati
 		}
 	}()
 
-	// Circular Write
+	// Begin circular Write
 	for {
 		select {
 		case message, ok := <-user.dataBuffer:
@@ -144,11 +147,15 @@ func (user *User) CircularWrite(ping time.Duration, maxWriteWaitTime time.Durati
 				return
 			}
 
+		// Every "ping" amount of time, ping client and wait for response.
+		// No response => error.
 		case <-ticker.C:
+			// Set new write deadline
 			err := user.conn.SetWriteDeadline(time.Now().Add(maxWriteWaitTime))
 			if err != nil {
 				log.Printf("[ERROR] unexpected error when user conection setting write deadline: %v", err)
 			}
+			// Send Ping
 			if err := user.conn.WriteMessage(websocket.PingMessage, nil); err != nil {
 				log.Printf("[ERROR] unexpected error when user conection writing messages: %v", err)
 				return
@@ -163,6 +170,11 @@ func (user *User) DisconnectWithWsServer() error {
 	// Unregister user from websocket
 	user.wsServer.unregister <- user
 
+	// Unregister the user from the channels
+	for channel := range user.channels {
+		channel.unregister <- user
+	}
+
 	// Close msg buffer channel
 	close(user.dataBuffer)
 
@@ -172,4 +184,111 @@ func (user *User) DisconnectWithWsServer() error {
 		return err
 	}
 	return nil
+}
+
+func (user *User) HandleNewMessage(jsonMsg []byte) error {
+
+	// Convert msg to the correct format
+	msg := MessageUnmarshal(jsonMsg)
+	if msg == nil {
+		return errors.New("Unable to handle new message")
+	}
+
+	// User is the sender of the message
+	msg.Sender = user
+
+	switch msg.Action {
+	case SendMessageAction:
+		// Room to send message to
+		channelName := msg.Target.GetName()
+
+		// If channel exists, send the message to the channel's broadcast method
+		if channel, _ := user.wsServer.FindChannel(FindChannelParams{channelName, nil}); channel != nil {
+			channel.broadcast <- msg
+		}
+
+	case JoinChannelAction:
+		user.HandleJoinChannelMessage(msg)
+
+	case LeaveChannelAction:
+		user.handleLeaveChannelMessage(msg)
+
+	case JoinPrivateChannelAction:
+		user.handleJoinChannelPrivateMessage(msg)
+	}
+
+	return nil
+}
+
+func (user *User) HandleJoinChannelMessage(message *Message) {
+	channelName := message.Message
+	user.joinChannel(channelName, nil)
+}
+
+func (user *User) handleLeaveChannelMessage(message *Message) {
+	channel := user.wsServer.findChannelByID(message.Message)
+	if channel == nil {
+		return
+	}
+
+	if _, ok := user.channels[channel]; ok {
+		delete(user.channels, channel)
+	}
+
+	channel.unregister <- user
+}
+
+func (user *User) handleJoinChannelPrivateMessage(message *Message) {
+
+	target := user.wsServer.findUserByID(message.Message)
+
+	if target == nil {
+		return
+	}
+
+	// create unique room name combined to the two IDs
+	channelName := message.Message + user.UserId
+
+	user.joinChannel(channelName, target)
+	target.joinChannel(channelName, user)
+
+}
+
+func (user *User) joinChannel(channelName string, sender *User) {
+
+	channel := user.wsServer.findChannelByName(channelName)
+	if channel == nil {
+		channel = user.wsServer.NewWsChannel(channelName, sender != nil)
+	}
+
+	if sender == nil && channel.Private {
+		return
+	}
+
+	if !user.isInChannel(channel) {
+
+		user.channels[channel] = true
+		channel.register <- user
+
+		user.notifyChannelJoined(channel, sender)
+	}
+
+}
+
+func (user *User) isInChannel(channel *Channel) bool {
+	if _, ok := user.channels[channel]; ok {
+		return true
+	}
+
+	return false
+}
+
+func (user *User) notifyChannelJoined(channel *Channel, sender *User) {
+	message := Message{
+		Action: ChannelJoinedAction,
+		Target: channel,
+		Sender: sender,
+	}
+
+	user.dataBuffer <- MessageMarshal(message)
 }
