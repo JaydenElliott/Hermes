@@ -161,6 +161,14 @@ func (server *WsServer) removeUser(user *User) {
 // and establishes the websocket connection. It then opens up concurent read/write
 // listener for the user.
 func (server *WsServer) ServeWs(w http.ResponseWriter, r *http.Request) {
+
+	name, ok := r.URL.Query()["name"]
+
+	if !ok || len(name[0]) < 1 {
+		log.Println("Url Param 'name' is missing")
+		return
+	}
+
 	wsConnection, err := connection.UpgradeHTTPToWS(w, r)
 	if err != nil {
 		fmt.Println("Error in establishing websocket connection: ", err)

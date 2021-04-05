@@ -57,53 +57,6 @@ func (channel *Channel) Run() {
 	}
 }
 
-// Adds a user to a room
-func (channel *Channel) registerUser(user *User) {
-	// Send join message to room
-	message := &Message{Action: JoinChannelAction,
-		Message: fmt.Sprintf("Welcome %s to the %s!", *user.username, *channel.channelName)}
-	channel.broadcastToUsers(MessageMarshal(*message))
-
-	// Register user
-	channel.users[user] = true
-
-	// Notify channel members that someone joined
-	channel.notifyClientJoined(user)
-}
-
-// Removes user from a room
-func (channel *Channel) unregisterUser(user *User) {
-	// Send leave message to room
-	message := &Message{Action: "User Left",
-		Message: fmt.Sprintf("%s left the channel", *user.username)}
-	channel.broadcastToUsers(MessageMarshal(*message))
-
-	// Remove from room
-	if _, ok := channel.users[user]; ok {
-		delete(channel.users, user)
-	}
-
-}
-
-func (channel *Channel) broadcastToUsers(message []byte) {
-	for user := range channel.users {
-		user.dataBuffer <- message
-	}
-}
-
-// Notifies the room that the user with username x joined.
-func (channel *Channel) notifyClientJoined(user *User) {
-	const welcomeMessage = "%s joined the room"
-	message := &Message{
-		Action:  SendMessageAction,
-		Target:  channel,
-		Message: fmt.Sprintf(welcomeMessage, user.GetUsername()),
-	}
-
-	// Send to all the users of the channel.
-	channel.broadcastToUsers(MessageMarshal(*message))
-}
-
 /*
 	Methods to get channel fields
 */
@@ -153,7 +106,6 @@ func (channel *Channel) GetUsers(p GetUsersParams_) ([]*string, error) {
 /*
 	Channel modification methods
 */
-
 func (channel *Channel) UpdateName(p UpdateName_) {
 	channel.channelName = &p.UpdatedName
 }
@@ -167,4 +119,51 @@ func (channel *Channel) CreateThread() *Thread {
 	threadID := uuid.New().String()
 	users := make(map[*User]bool)
 	return &Thread{&threadID, users, channel}
+}
+
+// Adds a user to a room
+func (channel *Channel) registerUser(user *User) {
+	// Send join message to room
+	message := &Message{Action: JoinChannelAction,
+		Message: fmt.Sprintf("Welcome %s to the %s!", *user.username, *channel.channelName)}
+	channel.broadcastToUsers(MessageMarshal(*message))
+
+	// Register user
+	channel.users[user] = true
+
+	// Notify channel members that someone joined
+	channel.notifyClientJoined(user)
+}
+
+// Removes user from a room
+func (channel *Channel) unregisterUser(user *User) {
+	// Send leave message to room
+	message := &Message{Action: "User Left",
+		Message: fmt.Sprintf("%s left the channel", *user.username)}
+	channel.broadcastToUsers(MessageMarshal(*message))
+
+	// Remove from room
+	if _, ok := channel.users[user]; ok {
+		delete(channel.users, user)
+	}
+
+}
+
+func (channel *Channel) broadcastToUsers(message []byte) {
+	for user := range channel.users {
+		user.dataBuffer <- message
+	}
+}
+
+// Notifies the room that the user with username x joined.
+func (channel *Channel) notifyClientJoined(user *User) {
+	const welcomeMessage = "%s joined the room"
+	message := &Message{
+		Action:  SendMessageAction,
+		Target:  channel,
+		Message: fmt.Sprintf(welcomeMessage, user.GetUsername()),
+	}
+
+	// Send to all the users of the channel.
+	channel.broadcastToUsers(MessageMarshal(*message))
 }
