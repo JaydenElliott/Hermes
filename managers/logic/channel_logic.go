@@ -132,7 +132,7 @@ func (channel *Channel) registerUser(user *User) {
 	channel.users[user] = true
 
 	// Notify channel members that someone joined
-	channel.notifyClientJoined(user)
+	channel.notifyUserJoined(user)
 }
 
 // Removes user from a room
@@ -156,12 +156,12 @@ func (channel *Channel) broadcastToUsers(message []byte) {
 }
 
 // Notifies the room that the user with username x joined.
-func (channel *Channel) notifyClientJoined(user *User) {
+func (channel *Channel) notifyUserJoined(user *User) {
 	const welcomeMessage = "%s joined the room"
 	message := &Message{
 		Action:  SendMessageAction,
 		Target:  channel,
-		Message: fmt.Sprintf(welcomeMessage, user.GetUsername()),
+		Message: fmt.Sprintf(welcomeMessage, *user.GetUsername()),
 	}
 
 	// Send to all the users of the channel.
