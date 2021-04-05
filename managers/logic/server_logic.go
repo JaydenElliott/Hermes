@@ -190,17 +190,9 @@ func (server *WsServer) Run() {
 		select {
 		// Register user
 		case user := <-server.register:
-			server.users[user] = true
-
+			server.addUser(user)
 		case user := <-server.unregister:
-			// Check if user exists
-			if _, ok := server.users[user]; ok {
-				delete(server.users, user)
-
-			} else {
-				// User not found in server
-				fmt.Println("Unable to unregister user ... user not found")
-			}
+			server.removeUser(user)
 		case message := <-server.broadcast:
 			server.broadcastToUsers(message)
 		}
