@@ -1,3 +1,3 @@
 # ArcStack WebSocket Service
 
-This is an old repository.
+Used this project as an introduction to golang.
